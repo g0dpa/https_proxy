@@ -6,7 +6,12 @@ MAX_QUEUE = 20          # Max number of connection
 MAX_PKT_SIZE = 99999     # Max size of packet
 
 # g0dpa's SSL proxy
-# create root certification before running SSL proxy
+# create root certification and apply to web-brower if necessary before running SSL proxy
+
+def usage():
+    print("syntax : python https_proxy <port>")
+    print("sample : python https_proxy 4433")
+    sys.exit(1)
 
 def initCert():
     # initialize cert
@@ -24,11 +29,7 @@ def setServer():
     print('+++ HTTPS_Proxy Server Running')
     print('+++ If you want to Quit, Press Ctrl-C')
 
-    HOST = 'localhost'
-    PORT = 4433
-
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((HOST, PORT))
     sock.listen(MAX_QUEUE)
@@ -50,10 +51,6 @@ def runProxy(sock):
     if not os.path.isfile(certPath):
         genCert(host)
     lock.release()
-
-    print(certPath)
-    keyFile = certPath + ".key"
-    certFile = certPath + ".crt"
     pemFile = certPath + ".pem"
 
     # wrap sock as ssl with certification
@@ -93,6 +90,12 @@ def runProxy(sock):
         sys.exit(1)
 
 if __name__=='__main__':
+    
+    if (len(sys.argv)<2):
+        usage()
+    else:
+        HOST = 'localhost'
+        PORT = int(sys.argv[1])
 
     sock = setServer()
     conn_list=[]
