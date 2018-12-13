@@ -61,7 +61,6 @@ def runProxy(sock):
         ssl_sock = ssl.wrap_socket(sock, server_side = True, certfile = pemFile)
     except Exception as e:
         print e
-        sys.exit(1)
 
     try:
         try:
