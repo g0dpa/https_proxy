@@ -46,8 +46,10 @@ def runProxy(sock):
     sock.send('HTTP/1.1 200 Connection established\r\nConnection: close\r\n\r\n'.encode())
 
     certPath = os.path.join("cert-master", host)
+    lock.acquire()
     if not os.path.isfile(certPath):
         genCert(host)
+    lock.release()
 
     print(certPath)
     keyFile = certPath + ".key"
@@ -56,7 +58,7 @@ def runProxy(sock):
 
     # wrap sock as ssl with certification
     try:
-        ssl_sock = ssl.wrap_socket(sock, server_side = True, keyfile = pemFile, certfile = pemFile)
+        ssl_sock = ssl.wrap_socket(sock, server_side = True, certfile = pemFile)
     except Exception as e:
         print e
         sys.exit(1)
@@ -96,7 +98,7 @@ if __name__=='__main__':
     sock = setServer()
     conn_list=[]
     initCert()
-
+    lock = threading.Lock()
     while True:
         try:
             conn, addr = sock.accept()
